@@ -285,7 +285,7 @@ RETURN_ARRAY_COPY:
 }
 
 NUMBA_EXPORT_FUNC(PyObject *)
-NRT_adapt_ndarray_to_python(arystruct_t* arystruct, int ndim,
+NRT_adapt_ndarray_to_python(arystruct_t* arystruct, PyTypeObject *retty, int ndim,
                             int writeable, PyArray_Descr *descr)
 {
     PyArrayObject *array;
@@ -329,7 +329,7 @@ NRT_adapt_ndarray_to_python(arystruct_t* arystruct, int ndim,
     shape = arystruct->shape_and_strides;
     strides = shape + ndim;
     Py_INCREF((PyObject *) descr);
-    array = (PyArrayObject *) PyArray_NewFromDescr(&PyArray_Type, descr, ndim,
+    array = (PyArrayObject *) PyArray_NewFromDescr(retty, descr, ndim,
                                                    shape, strides, arystruct->data,
                                                    flags, (PyObject *) miobj);
 

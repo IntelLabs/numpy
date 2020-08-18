@@ -767,6 +767,7 @@ int
 typeof_typecode(PyObject *dispatcher, PyObject *val)
 {
     PyTypeObject *tyobj = Py_TYPE(val);
+    int no_subtype_attr;
     /* This needs to be kept in sync with Dispatcher.typeof_pyval(),
      * otherwise funny things may happen.
      */
@@ -793,8 +794,15 @@ typeof_typecode(PyObject *dispatcher, PyObject *val)
         return typecode_arrayscalar(dispatcher, val);
     }
     /* Array handling */
-    else if (PyType_IsSubtype(tyobj, &PyArray_Type)) {
+    else if (tyobj == &PyArray_Type) {
         return typecode_ndarray(dispatcher, (PyArrayObject*)val);
+    }
+    /* Subtypes of Array handling */
+    else if (PyType_IsSubtype(tyobj, &PyArray_Type)) {
+        no_subtype_attr = PyObject_HasAttrString(val, "__numba_no_subtype_ndarray__");
+        if (!no_subtype_attr) {
+            return typecode_ndarray(dispatcher, (PyArrayObject*)val);
+        }
     }
 
     return typecode_using_fingerprint(dispatcher, val);
